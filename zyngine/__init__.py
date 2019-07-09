@@ -14,6 +14,7 @@ __all__ = [
 	"zynthian_engine_puredata",
 	"zynthian_engine_aeolus",
 	"zynthian_engine_jalv",
+	"zynthian_engine_mooer_radar_driver"
 ]
 #from zyngine.zynthian_midi import *
 from zyngine.zynthian_zcmidi import *

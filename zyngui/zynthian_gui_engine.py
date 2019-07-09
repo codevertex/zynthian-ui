@@ -57,7 +57,7 @@ def initializator(cls):
 @initializator
 class zynthian_gui_engine(zynthian_gui_selector):
 
-	single_layer_engines = ["BF", "MD", "PT", "PD", "AE"]
+	single_layer_engines = ["BF", "MD", "PT", "PD", "AE", "RA"]
 	check_channels_engines = ["AE"]
 
 	@classmethod
@@ -68,7 +68,8 @@ class zynthian_gui_engine(zynthian_gui_selector):
 			["FS", ("FluidSynth", "FluidSynth - SF2 Player", "MIDI Synth", zynthian_engine_fluidsynth)],
 			["LS", ("LinuxSampler", "LinuxSampler - SFZ/GIG Player", "MIDI Synth", zynthian_engine_linuxsampler)],
 			["BF", ("setBfree", "setBfree - Hammond Emulator", "MIDI Synth", zynthian_engine_setbfree)],
-			["AE", ("Aeolus", "Aeolus - Pipe Organ Emulator", "MIDI Synth", zynthian_engine_aeolus)]
+			["AE", ("Aeolus", "Aeolus - Pipe Organ Emulator", "MIDI Synth", zynthian_engine_aeolus)],
+			["RA", ("MooerRadarDriver", "MooerRadarDriver - USB stimulus", "Special", zynthian_engine_mooer_radar_driver)]
 		])
 
 		if check_pianoteq_binary():
