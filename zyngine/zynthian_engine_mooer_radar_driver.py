@@ -67,19 +67,19 @@ class zynthian_engine_mooer_radar_driver(zynthian_engine):
 
 	def __init__(self, zyngui=None):
 		super().__init__(zyngui)
-		self.name = "Mooer Radar Driver"
-		self.nickname = "RADAR"
-		self.jackname = "mooerRadar"
+		self.name = "MooerRadarDriver"
+		self.nickname = "RA"
+		self.jackname = "mooerradardriver"
 
 		self.options['midi_chan']=False
 
-		self.base_dir = self.data_dir + "/mooerRadarDriver"
+		self.base_dir = self.data_dir + "/mooerradardriver"
 
 		self.bank_config = None
 
 		#Process command ...
-		preset_fpath = self.base_dir + "/pgm/all.pgm"
-		config_fpath = self.base_dir + "/cfg/zynthian.cfg"
+		#preset_fpath = self.base_dir + "/pgm/all.pgm"
+		#config_fpath = self.base_dir + "/cfg/zynthian.cfg"
 		# if self.config_remote_display():
 		# 	self.command = "/usr/local/bin/setBfree -p \"{}\" -c \"{}\"".format(preset_fpath, config_fpath)
 		# else:
@@ -158,7 +158,7 @@ class zynthian_engine_mooer_radar_driver(zynthian_engine):
 	def get_preset_list(self, bank):
 		logging.debug("Preset List for Bank {}".format(bank[0]))
 		pgm_list = None
-		pgm_list.append((0, [0, 0, "?"], "Default", ""))
+		pgm_list.append((0, [0, 0, "?"], "Mooer Radar Bank 0", ""))
 		return pgm_list
 
 	def set_preset(self, layer, preset, preload=False):

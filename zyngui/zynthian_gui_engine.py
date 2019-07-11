@@ -69,7 +69,7 @@ class zynthian_gui_engine(zynthian_gui_selector):
 			["LS", ("LinuxSampler", "LinuxSampler - SFZ/GIG Player", "MIDI Synth", zynthian_engine_linuxsampler)],
 			["BF", ("setBfree", "setBfree - Hammond Emulator", "MIDI Synth", zynthian_engine_setbfree)],
 			["AE", ("Aeolus", "Aeolus - Pipe Organ Emulator", "MIDI Synth", zynthian_engine_aeolus)],
-			["RA", ("MooerRadarDriver", "MooerRadarDriver - USB stimulus", "Special", zynthian_engine_mooer_radar_driver)]
+			["RA", ("MooerRadarDriver", "MooerRadarDriver - USB MIDI", "Special", zynthian_engine_mooer_radar_driver)]
 		])
 
 		if check_pianoteq_binary():
