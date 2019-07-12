@@ -22,6 +22,7 @@
 # 
 #******************************************************************************
 
+import importlib
 import re
 import logging
 import pexpect
@@ -59,6 +60,51 @@ class zynthian_engine_mooer_radar_driver(zynthian_engine):
 		['main',['volume']]
 	]
 
+	# ---------------------------------------------------------------------------
+	# Mooer Radar related
+	# ---------------------------------------------------------------------------
+
+	MOOER_RADAR_VENDOR_ID = 0x0483
+	MOOER_RADAR_PRODUCT_ID = 0x5703
+
+	PREDEFINED_RADAR_MSGS = [
+		"0BAA550500E700000001CAA1",
+		"0BAA550500E700000002FAC2",
+		"0BAA550500E700000003EAE3",
+		"0BAA550500E7000000049A04",
+		"0BAA550500E7000000058A25",
+		"0BAA550500E700000006BA46",
+		"0BAA550500E700000007AA67",
+		"0BAA550500E7000000085B88",
+		"0BAA550500E7000000094BA9",
+		"0BAA550500E70000000A7BCA",
+		"0BAA550500E70000000B6BEB",
+		"0BAA550500E70000000C1B0C",
+		"0BAA550500E70000000D0B2D",
+		"0BAA550500E70000000E3B4E",
+		"0BAA550500E70000000F2B6F",
+		"0BAA550500E700000010C8B1",
+		"0BAA550500E700000011D890",
+		"0BAA550500E700000012E8F3",
+		"0BAA550500E700000013F8D2",
+		"0BAA550500E7000000148835",
+		"0BAA550500E7000000159814",
+		"0BAA550500E700000016A877",
+		"0BAA550500E700000017B856",
+		"0BAA550500E70000001849B9",
+		"0BAA550500E7000000195998",
+		"0BAA550500E70000001A69FB",
+		"0BAA550500E70000001B79DA",
+		"0BAA550500E70000001C093D",
+		"0BAA550500E70000001D191C",
+		"0BAA550500E70000001E297F",
+		"0BAA550500E70000001F395E",
+		"0BAA550500E700000020FEE2",
+		"0BAA550500E700000021EEC3",
+		"0BAA550500E700000022DEA0",
+		"0BAA550500E700000023CE81",
+		"0BAA550500E700000024BE66"
+	]
 
 	#----------------------------------------------------------------------------
 	# Initialization
@@ -71,6 +117,9 @@ class zynthian_engine_mooer_radar_driver(zynthian_engine):
 		self.nickname = "RA"
 		self.jackname = "mooerradardriver"
 
+		self.usb_module = None
+		self.usb_device = None
+
 		self.options['midi_chan']=False
 
 		self.base_dir = self.data_dir + "/mooerradardriver"
@@ -78,8 +127,8 @@ class zynthian_engine_mooer_radar_driver(zynthian_engine):
 		self.bank_config = None
 
 		#Process command ...
-		#preset_fpath = self.base_dir + "/pgm/all.pgm"
-		#config_fpath = self.base_dir + "/cfg/zynthian.cfg"
+		# preset_fpath = self.base_dir + "/pgm/all.pgm"
+		# config_fpath = self.base_dir + "/cfg/zynthian.cfg"
 		# if self.config_remote_display():
 		# 	self.command = "/usr/local/bin/setBfree -p \"{}\" -c \"{}\"".format(preset_fpath, config_fpath)
 		# else:
@@ -99,6 +148,87 @@ class zynthian_engine_mooer_radar_driver(zynthian_engine):
 	# 	# Nothing to do
 	# 	nothingToDo = True
 
+	# ---------------------------------------------------------------------------
+	# Custom Start/Stop
+	# ---------------------------------------------------------------------------
+
+	def start(self):
+		if self.usb_module is None:
+			logging.info("Starting Engine " + self.name)
+			try:
+				#self.start_loading()
+				self.usb_module = importlib.import_module("usb")
+
+				if self.usb_module is not None:
+					return "All is cool"
+				else:
+					raise Exception("USB module not found!")
+
+			except Exception as err:
+				logging.error("Can't start engine {} => {}".format(self.name, err))
+
+			#self.stop_loading()
+
+	def stop(self):
+		if self.usb_module is not None:
+			#self.start_loading()
+			try:
+				logging.info("Stopping Engine " + self.name)
+				del self.usb_module
+
+			except Exception as err:
+				logging.error("Can't stop engine {} => {}".format(self.name, err))
+
+			#self.stop_loading()
+
+	# ---------------------------------------------------------------------------
+	# Mooer Radar Specific
+	# ---------------------------------------------------------------------------
+
+	def set_radar_preset(self, preset_number):
+		logging.info("Preset change requested")
+
+		if self.usb_module is not None:
+			try:
+				logging.info("Finding Mooer Radar over USB...")
+
+				# Find the Mooer Radar USB device
+				self.usb_device = self.usb_module.core.find(
+					idVendor=self.MOOER_RADAR_VENDOR_ID, idProduct=self.MOOER_RADAR_PRODUCT_ID)
+
+				# Did we find the device?
+				if self.usb_device is not None:
+					logging.info("Device Found!")
+
+					# Claim the device and its interface
+					if self.usb_device.is_kernel_driver_active(0):
+						logging.info("Need to detach kernel driver, doing so now...")
+						self.usb_device.detach_kernel_driver(0)
+						logging.info("Done.")
+
+					logging.info("Attempting to claim the USB interface...")
+					self.usb_module.util.claim_interface(self.usb_device, 0)
+					logging.info("Done.")
+
+					# Send the preset change request
+					logging.info("Sending preset change {} request over USB...".format(preset_number))
+					message_to_use = self.PREDEFINED_RADAR_MSGS[int(preset_number) - 1]
+					self.usb_device.write(2, message_to_use.decode("hex"))
+					logging.info("Done.")
+				else:
+					logging.info("Device Not Found!")
+
+			except Exception as err:
+				logging.error("Failed to communicate with Mooer Radar: {}".format(err))
+
+			try:
+				# Release the device and interface
+				logging.info("Releasing the interface...")
+				self.usb_module.util.release_interface(self.usb_device, 0)
+				logging.info("Done.")
+				self.usb_device = None
+			except Exception as err:
+				logging.error("Failed to release USB device!")
 
 	# ---------------------------------------------------------------------------
 	# Layer Management
@@ -118,8 +248,10 @@ class zynthian_engine_mooer_radar_driver(zynthian_engine):
 	def get_bank_list(self, layer):
 		return self.bank_list
 
+	def set_bank(self, layer, bank):
+		self.set_radar_preset(bank)
+		return True
 
-	# def set_bank(self, layer, bank):
 	# 	# if not self.bank_config:
 	# 	# 	self.bank_config = bank
 	# 	# 	self.layers[0].load_bank_list()
@@ -157,8 +289,7 @@ class zynthian_engine_mooer_radar_driver(zynthian_engine):
 
 	def get_preset_list(self, bank):
 		logging.debug("Preset List for Bank {}".format(bank[0]))
-		pgm_list = None
-		pgm_list.append((0, [0, 0, "?"], "Mooer Radar Bank 0", ""))
+		pgm_list = [(0, [0, 0, "?"], "Mooer Radar Bank 0", "")]
 		return pgm_list
 
 	def set_preset(self, layer, preset, preload=False):
@@ -183,9 +314,9 @@ class zynthian_engine_mooer_radar_driver(zynthian_engine):
 	# Controller Managament
 	#----------------------------------------------------------------------------
 
-	# def update_controller_values(self, layer, preset):
-	# 	# Nothing to do
-	# 	nothingToDo = True
+	def update_controller_values(self, layer, preset):
+	 	# Nothing to do
+	 	nothingToDo = True
 
 	# def midi_zctrl_change(self, zctrl, val):
 	# 	try:
