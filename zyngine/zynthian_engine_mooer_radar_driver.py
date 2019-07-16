@@ -43,42 +43,42 @@ class zynthian_engine_mooer_radar_driver(zynthian_engine):
 
 
 	pgm_list = [
-		["Mooer Radar U 1", [0, 0, 1], "Mooer Radar U 1", 1],
-		["Mooer Radar U 2", [0, 0, 2], "Mooer Radar U 2", 2],
-		["Mooer Radar U 3", [0, 0, 3], "Mooer Radar U 3", 3],
-		["Mooer Radar U 4", [0, 0, 4], "Mooer Radar U 4", 4],
-		["Mooer Radar U 5", [0, 0, 5], "Mooer Radar U 5", 5],
-		["Mooer Radar U 6", [0, 0, 6], "Mooer Radar U 6", 6],
-		["Mooer Radar U 7", [0, 0, 7], "Mooer Radar U 7", 7],
-		["Mooer Radar U 8", [0, 0, 8], "Mooer Radar U 8", 8],
-		["Mooer Radar U 9", [0, 0, 9], "Mooer Radar U 9", 9],
-		["Mooer Radar U 10", [0, 0, 10], "Mooer Radar U 10", 10],
-		["Mooer Radar U 11", [0, 0, 11], "Mooer Radar U 11", 11],
-		["Mooer Radar U 12", [0, 0, 12], "Mooer Radar U 12", 12],
-		["Mooer Radar U 13", [0, 0, 13], "Mooer Radar U 13", 13],
-		["Mooer Radar U 14", [0, 0, 14], "Mooer Radar U 14", 14],
-		["Mooer Radar U 15", [0, 0, 15], "Mooer Radar U 15", 15],
-		["Mooer Radar U 16", [0, 0, 16], "Mooer Radar U 16", 16],
-		["Mooer Radar U 17", [0, 0, 17], "Mooer Radar U 17", 17],
-		["Mooer Radar U 18", [0, 0, 18], "Mooer Radar U 18", 18],
-		["Mooer Radar U 19", [0, 0, 19], "Mooer Radar U 19", 19],
-		["Mooer Radar U 20", [0, 0, 20], "Mooer Radar U 20", 20],
-		["Mooer Radar U 21", [0, 0, 21], "Mooer Radar U 21", 21],
-		["Mooer Radar U 22", [0, 0, 22], "Mooer Radar U 22", 22],
-		["Mooer Radar U 23", [0, 0, 23], "Mooer Radar U 23", 23],
-		["Mooer Radar U 24", [0, 0, 24], "Mooer Radar U 24", 24],
-		["Mooer Radar U 25", [0, 0, 25], "Mooer Radar U 25", 25],
-		["Mooer Radar U 26", [0, 0, 26], "Mooer Radar U 27", 26],
-		["Mooer Radar U 27", [0, 0, 27], "Mooer Radar U 28", 27],
-		["Mooer Radar U 28", [0, 0, 28], "Mooer Radar U 29", 28],
-		["Mooer Radar U 29", [0, 0, 29], "Mooer Radar U 20", 29],
-		["Mooer Radar U 30", [0, 0, 30], "Mooer Radar U 30", 30],
-		["Mooer Radar U 31", [0, 0, 31], "Mooer Radar U 31", 31],
-		["Mooer Radar U 32", [0, 0, 32], "Mooer Radar U 32", 32],
-		["Mooer Radar U 33", [0, 0, 33], "Mooer Radar U 33", 33],
-		["Mooer Radar U 34", [0, 0, 34], "Mooer Radar U 34", 34],
-		["Mooer Radar U 35", [0, 0, 35], "Mooer Radar U 35", 35],
-		["Mooer Radar U 36", [0, 0, 36], "Mooer Radar U 36", 36]
+		["Mooer Radar U 1", [0, 0, 1], "Mooer Radar U 1", 0],
+		["Mooer Radar U 2", [0, 0, 2], "Mooer Radar U 2", 1],
+		["Mooer Radar U 3", [0, 0, 3], "Mooer Radar U 3", 2],
+		["Mooer Radar U 4", [0, 0, 4], "Mooer Radar U 4", 3],
+		["Mooer Radar U 5", [0, 0, 5], "Mooer Radar U 5", 4],
+		["Mooer Radar U 6", [0, 0, 6], "Mooer Radar U 6", 5],
+		["Mooer Radar U 7", [0, 0, 7], "Mooer Radar U 7", 6],
+		["Mooer Radar U 8", [0, 0, 8], "Mooer Radar U 8", 7],
+		["Mooer Radar U 9", [0, 0, 9], "Mooer Radar U 9", 8],
+		["Mooer Radar U 10", [0, 0, 10], "Mooer Radar U 10", 9],
+		["Mooer Radar U 11", [0, 0, 11], "Mooer Radar U 11", 10],
+		["Mooer Radar U 12", [0, 0, 12], "Mooer Radar U 12", 11],
+		["Mooer Radar U 13", [0, 0, 13], "Mooer Radar U 13", 12],
+		["Mooer Radar U 14", [0, 0, 14], "Mooer Radar U 14", 13],
+		["Mooer Radar U 15", [0, 0, 15], "Mooer Radar U 15", 14],
+		["Mooer Radar U 16", [0, 0, 16], "Mooer Radar U 16", 15],
+		["Mooer Radar U 17", [0, 0, 17], "Mooer Radar U 17", 16],
+		["Mooer Radar U 18", [0, 0, 18], "Mooer Radar U 18", 17],
+		["Mooer Radar U 19", [0, 0, 19], "Mooer Radar U 19", 18],
+		["Mooer Radar U 20", [0, 0, 20], "Mooer Radar U 20", 19],
+		["Mooer Radar U 21", [0, 0, 21], "Mooer Radar U 21", 20],
+		["Mooer Radar U 22", [0, 0, 22], "Mooer Radar U 22", 21],
+		["Mooer Radar U 23", [0, 0, 23], "Mooer Radar U 23", 22],
+		["Mooer Radar U 24", [0, 0, 24], "Mooer Radar U 24", 23],
+		["Mooer Radar U 25", [0, 0, 25], "Mooer Radar U 25", 24],
+		["Mooer Radar U 26", [0, 0, 26], "Mooer Radar U 27", 25],
+		["Mooer Radar U 27", [0, 0, 27], "Mooer Radar U 28", 26],
+		["Mooer Radar U 28", [0, 0, 28], "Mooer Radar U 29", 27],
+		["Mooer Radar U 29", [0, 0, 29], "Mooer Radar U 20", 28],
+		["Mooer Radar U 30", [0, 0, 30], "Mooer Radar U 30", 29],
+		["Mooer Radar U 31", [0, 0, 31], "Mooer Radar U 31", 30],
+		["Mooer Radar U 32", [0, 0, 32], "Mooer Radar U 32", 31],
+		["Mooer Radar U 33", [0, 0, 33], "Mooer Radar U 33", 32],
+		["Mooer Radar U 34", [0, 0, 34], "Mooer Radar U 34", 33],
+		["Mooer Radar U 35", [0, 0, 35], "Mooer Radar U 35", 34],
+		["Mooer Radar U 36", [0, 0, 36], "Mooer Radar U 36", 35]
 	]
 
 
@@ -251,7 +251,7 @@ class zynthian_engine_mooer_radar_driver(zynthian_engine):
 						try:
 							# Send the preset change request
 							logging.info("Sending preset change {} request over USB, attempt {}".format(preset_number, attempt_count))
-							message_to_use = self.PREDEFINED_RADAR_MSGS[int(preset_number) - 1]
+							message_to_use = self.PREDEFINED_RADAR_MSGS[int(preset_number)]
 							self.usb_device.write(2, codecs.decode(message_to_use, "hex"))
 							logging.info("Done.")
 							break
