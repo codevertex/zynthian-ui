@@ -57,7 +57,7 @@ class zynthian_gui_midi_recorder(zynthian_gui_selector):
 
 	def __init__(self):
 		self.capture_dir_sdc = os.environ.get('ZYNTHIAN_MY_DATA_DIR',"/zynthian/zynthian-my-data") + "/capture"
-		self.capture_dir_usb = "/media/usb0"
+		self.capture_dir_usb = os.environ.get('ZYNTHIAN_EX_DATA_DIR',"/media/usb0")
 		self.current_record = None
 		self.rec_proc = None
 		self.play_proc = None
@@ -171,7 +171,7 @@ class zynthian_gui_midi_recorder(zynthian_gui_selector):
 			cmd=self.sys_dir +"/sbin/jack-smf-recorder.sh --port {}".format(self.jack_record_port)
 			#logging.info("COMMAND: %s" % cmd)
 			self.rec_proc=Popen(cmd.split(" "), shell=True, preexec_fn=os.setpgrp)
-			sleep(0.5)
+			sleep(0.2)
 		except Exception as e:
 			logging.error("ERROR STARTING MIDI RECORD: %s" % e)
 			self.zyngui.show_info("ERROR STARTING MIDI RECORD:\n %s" % e)
@@ -184,33 +184,47 @@ class zynthian_gui_midi_recorder(zynthian_gui_selector):
 		self.rec_proc.terminate()
 		os.killpg(os.getpgid(self.rec_proc.pid), signal.SIGINT)
 		while self.rec_proc.poll() is None:
-			sleep(0.5)
+			sleep(0.2)
 		self.update_list()
 	
 
-	def start_playing(self, fpath):
+	def start_playing(self, fpath=None):
 		if self.play_proc and self.play_proc.poll() is None:
 			self.stop_playing()
+
+		if fpath is None:
+			fpath = self.get_current_track_fpath()
+		
+		if fpath is None:
+			logging.info("No track to play!")
+			return
+
 		logging.info("STARTING MIDI PLAY '{}' ...".format(fpath))
+
 		try:
 			if zynthian_gui_config.midi_play_loop:
 				cmd="/usr/local/bin/jack-smf-player -s -t -l -a {} {}".format(self.jack_play_port, fpath)
 			else:
 				cmd="/usr/local/bin/jack-smf-player -s -t -a {} {}".format(self.jack_play_port, fpath)
+
 			logging.info("COMMAND: %s" % cmd)
+
 			def runInThread(onExit, pargs):
 				self.play_proc = Popen(pargs)
 				self.play_proc.wait()
 				self.stop_playing()
 				return
+
 			thread = threading.Thread(target=runInThread, args=(self.stop_playing, cmd.split(" ")), daemon=True)
 			thread.start()
-			sleep(0.5)
+			sleep(0.2)
 			self.current_record=fpath
+
 		except Exception as e:
 			logging.error("ERROR STARTING MIDI PLAY: %s" % e)
 			self.zyngui.show_info("ERROR STARTING MIDI PLAY:\n %s" % e)
 			self.zyngui.hide_info_timer(5000)
+
 		self.update_list()
 
 
@@ -218,12 +232,26 @@ class zynthian_gui_midi_recorder(zynthian_gui_selector):
 		logging.info("STOPPING MIDI PLAY ...")
 		try:
 			self.play_proc.send_signal(signal.SIGINT)
-			sleep(0.5)
+			sleep(0.2)
 			self.play_proc.terminate()
 		except:
 			pass
 		self.current_record=None
 		self.update_list()
+
+
+	def get_current_track_fpath(self):
+		if not self.list_data:
+			self.fill_list()
+		#if selected track ...
+		if self.list_data[self.index][1]>0:
+			return self.list_data[self.index][0]
+		#return last track if there is one ...
+		elif self.list_data[-1][1]>0:
+			return self.list_data[-1][0]
+		#else return None
+		else:
+			return None
 
 
 	def toggle_loop(self):

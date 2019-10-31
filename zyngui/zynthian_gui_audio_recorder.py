@@ -53,7 +53,7 @@ class zynthian_gui_audio_recorder(zynthian_gui_selector):
 
 	def __init__(self):
 		self.capture_dir_sdc = os.environ.get('ZYNTHIAN_MY_DATA_DIR',"/zynthian/zynthian-my-data") + "/capture"
-		self.capture_dir_usb = "/media/usb0"
+		self.capture_dir_usb = os.environ.get('ZYNTHIAN_EX_DATA_DIR',"/media/usb0")
 		self.current_record = None
 		self.rec_proc = None
 		self.play_proc = None
@@ -174,7 +174,7 @@ class zynthian_gui_audio_recorder(zynthian_gui_selector):
 			cmd=self.sys_dir +"/sbin/jack_capture.sh --zui"
 			#logging.info("COMMAND: %s" % cmd)
 			self.rec_proc=Popen(cmd.split(" "), stdout=PIPE, stderr=PIPE)
-			sleep(0.5)
+			sleep(0.2)
 			check_output("echo play | jack_transport", shell=True)
 		except Exception as e:
 			logging.error("ERROR STARTING AUDIO RECORD: %s" % e)
@@ -188,33 +188,47 @@ class zynthian_gui_audio_recorder(zynthian_gui_selector):
 		check_output("echo stop | jack_transport", shell=True)
 		self.rec_proc.communicate()
 		while zynconf.is_process_running("jack_capture"):
-			sleep(1)
+			sleep(0.2)
 		self.update_list()
 
 
-	def start_playing(self, fpath):
+	def start_playing(self, fpath=None):
 		if self.current_record:
 			self.stop_playing()
+
+		if fpath is None:
+			fpath = self.get_current_track_fpath()
+		
+		if fpath is None:
+			logging.info("No track to play!")
+			return
+
 		logging.info("STARTING AUDIO PLAY '{}' ...".format(fpath))
+
 		try:
 			if zynthian_gui_config.audio_play_loop:
 				cmd="/usr/bin/mplayer -nogui -noconsolecontrols -nolirc -nojoystick -really-quiet -slave -loop 0 -ao jack {}".format(fpath)
 			else:
 				cmd="/usr/bin/mplayer -nogui -noconsolecontrols -nolirc -nojoystick -really-quiet -slave -ao jack {}".format(fpath)
+
 			logging.info("COMMAND: %s" % cmd)
+
 			def runInThread(onExit, pargs):
 				self.play_proc = Popen(pargs, stdin=PIPE, universal_newlines=True)
 				self.play_proc.wait()
 				self.stop_playing()
 				return
+
 			thread = threading.Thread(target=runInThread, args=(self.stop_playing, cmd.split(" ")), daemon=True)
 			thread.start()
-			sleep(0.5)
+			sleep(0.2)
 			self.current_record=fpath
+
 		except Exception as e:
 			logging.error("ERROR STARTING AUDIO PLAY: %s" % e)
 			self.zyngui.show_info("ERROR STARTING AUDIO PLAY:\n %s" % e)
 			self.zyngui.hide_info_timer(5000)
+
 		self.update_list()
 
 
@@ -230,6 +244,22 @@ class zynthian_gui_audio_recorder(zynthian_gui_selector):
 		self.current_record=None
 		self.update_list()
 
+
+	def get_current_track_fpath(self):
+		# Fill list if it's empty ...
+		if not self.list_data:
+			self.fill_list()
+		#if selected track ...
+		if self.list_data[self.index][1]>0:
+			return self.list_data[self.index][0]
+		#return last track if there is one ...
+		elif self.list_data[-1][1]>0:
+			return self.list_data[-1][0]
+		#else return None
+		else:
+			return None
+
+
 	def toggle_loop(self):
 		if zynthian_gui_config.audio_play_loop:
 			logging.info("Audio play loop OFF")
@@ -239,6 +269,7 @@ class zynthian_gui_audio_recorder(zynthian_gui_selector):
 			zynthian_gui_config.audio_play_loop=True
 		zynconf.save_config({"ZYNTHIAN_AUDIO_PLAY_LOOP": str(int(zynthian_gui_config.audio_play_loop))})
 		self.update_list()
+
 
 	def set_select_path(self):
 		self.select_path.set("Audio Recorder")

@@ -56,9 +56,32 @@ CustomUiAction = [
 	"POWER_OFF",
 	"REBOOT",
 	"RESTART_UI",
+
 	"ALL_NOTES_OFF",
 	"ALL_SOUNDS_OFF",
-	"ALL_OFF"
+	"ALL_OFF",
+
+	"START_AUDIO_RECORD",
+	"STOP_AUDIO_RECORD",
+	"START_MIDI_RECORD",
+	"STOP_MIDI_RECORD",
+
+	"SELECT",
+	"SELECT_UP",
+	"SELECT_DOWN",
+
+	"SWITCH_LAYER_SHORT",
+	"SWITCH_LAYER_BOLD",
+	"SWITCH_LAYER_LONG",
+	"SWITCH_BACK_SHORT",
+	"SWITCH_BACK_BOLD",
+	"SWITCH_BACK_LONG",
+	"SWITCH_SNAPSHOT_SHORT",
+	"SWITCH_SNAPSHOT_BOLD",
+	"SWITCH_SNAPSHOT_LONG",
+	"SWITCH_SELECT_SHORT",
+	"SWITCH_SELECT_BOLD",
+	"SWITCH_SELECT_LONG"
 ];
 
 #-------------------------------------------------------------------------------
@@ -90,6 +113,7 @@ def get_midi_config_fpath(fpath=None):
 		copyfile(default_src, fpath)
 
 	return fpath
+
 
 def load_config(set_env=True, fpath=None):
 	if not fpath:

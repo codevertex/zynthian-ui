@@ -310,47 +310,49 @@ def set_midi_config():
 	enabled_midi_fb_ports=zynconf.get_enabled_midi_fb_ports(midi_ports)
 
 	# Master Channel Features
-	master_midi_channel=int(os.environ.get('ZYNTHIAN_MIDI_MASTER_CHANNEL',16))
 
-	master_midi_change_type=os.environ.get('ZYNTHIAN_MIDI_MASTER_CHANGE_TYPE',"Roland")
+	master_midi_channel = int(os.environ.get('ZYNTHIAN_MIDI_MASTER_CHANNEL',16))
+	if master_midi_channel>16:
+		master_midi_channel = 16
+	master_midi_channel = master_midi_channel-1
+	mmc_hex = hex(master_midi_channel)[2]
 
-	master_midi_program_change_up=os.environ.get('ZYNTHIAN_MIDI_MASTER_PROGRAM_CHANGE_UP',"C#7F")
-	master_midi_program_change_down=os.environ.get('ZYNTHIAN_MIDI_MASTER_PROGRAM_CHANGE_DOWN',"C#00")
-
-	if master_midi_program_change_down=="C#00":
-		master_midi_program_base=1
-	else:
-		master_midi_program_base=0
+	master_midi_change_type = os.environ.get('ZYNTHIAN_MIDI_MASTER_CHANGE_TYPE',"Roland")
 
 	#Use LSB Bank by default
-	master_midi_bank_change_ccnum=os.environ.get('ZYNTHIAN_MIDI_MASTER_BANK_CHANGE_CCNUM',0x20)
+	master_midi_bank_change_ccnum = int(os.environ.get('ZYNTHIAN_MIDI_MASTER_BANK_CHANGE_CCNUM',0x20))
 	#Use MSB Bank by default
-	#master_midi_bank_change_ccnum=os.environ.get('ZYNTHIAN_MIDI_MASTER_BANK_CHANGE_CCNUM',0x00)
+	#master_midi_bank_change_ccnum = int(os.environ.get('ZYNTHIAN_MIDI_MASTER_BANK_CHANGE_CCNUM',0x00))
 
-	master_midi_bank_change_up=os.environ.get('ZYNTHIAN_MIDI_MASTER_BANK_CHANGE_UP',"B#207F")
-	master_midi_bank_change_down=os.environ.get('ZYNTHIAN_MIDI_MASTER_BANK_CHANGE_DOWN',"B#2000")
+	mmpcu = os.environ.get('ZYNTHIAN_MIDI_MASTER_PROGRAM_CHANGE_UP', "")
+	if len(mmpcu)==4:
+		master_midi_program_change_up = int('{:<06}'.format(mmpcu.replace('#',mmc_hex)),16)
+	else:
+		master_midi_program_change_up = None
 
-	try:
-		master_midi_bank_change_down_ccnum=int(master_midi_bank_change_down[2:4],16)
-		if master_midi_bank_change_down_ccnum==master_midi_bank_change_ccnum:
-			master_midi_bank_base=1
-		else:
-			master_midi_bank_base=0
-	except:
-		master_midi_bank_base=0
+	mmpcd = os.environ.get('ZYNTHIAN_MIDI_MASTER_PROGRAM_CHANGE_DOWN', "")
+	if len(mmpcd)==4:
+		master_midi_program_change_down = int('{:<06}'.format(mmpcd.replace('#',mmc_hex)),16)
+	else:
+		master_midi_program_change_down = None
 
-	#MIDI channels: 0-15
-	if master_midi_channel>16:
-		master_midi_channel=16
-	master_midi_channel=master_midi_channel-1
-	mmc_hex=hex(master_midi_channel)[2]
+	mmbcu = os.environ.get('ZYNTHIAN_MIDI_MASTER_BANK_CHANGE_UP', "")
+	if len(mmbcu)==6:
+		master_midi_bank_change_up = int('{:<06}'.format(mmbcu.replace('#',mmc_hex)),16)
+	else:
+		master_midi_bank_change_up = None
 
-	#Calculate MIDI Sequences and convert to Integer
-	master_midi_program_change_up=int('{:<06}'.format(master_midi_program_change_up.replace('#',mmc_hex)),16)
-	master_midi_program_change_down=int('{:<06}'.format(master_midi_program_change_down.replace('#',mmc_hex)),16)
-	master_midi_bank_change_up=int('{:<06}'.format(master_midi_bank_change_up.replace('#',mmc_hex)),16)
-	master_midi_bank_change_down=int('{:<06}'.format(master_midi_bank_change_down.replace('#',mmc_hex)),16)
+	mmbcd = os.environ.get('ZYNTHIAN_MIDI_MASTER_BANK_CHANGE_DOWN', "")
+	if len(mmbcd)==6:
+		master_midi_bank_change_down = int('{:<06}'.format(mmbcd.replace('#',mmc_hex)),16)
+	else:
+		master_midi_bank_change_down = None
 
+	logging.debug("MMC Bank Change CCNum: {}".format(master_midi_bank_change_ccnum))
+	logging.debug("MMC Bank Change UP: {}".format(master_midi_bank_change_up))
+	logging.debug("MMC Bank Change DOWN: {}".format(master_midi_bank_change_down))
+	logging.debug("MMC Program Change UP: {}".format(master_midi_program_change_up))
+	logging.debug("MMC Program Change DOWN: {}".format(master_midi_program_change_down))
 
 #Set MIDI config variables
 set_midi_config()
@@ -361,70 +363,78 @@ set_midi_config()
 midi_play_loop=int(os.environ.get('ZYNTHIAN_MIDI_PLAY_LOOP',0))
 audio_play_loop=int(os.environ.get('ZYNTHIAN_AUDIO_PLAY_LOOP',0))
 
-#------------------------------------------------------------------------------
-# Create & Configure Top Level window 
-#------------------------------------------------------------------------------
 
-top = tkinter.Tk()
-
-# Try to autodetect screen size if not configured
+#------------------------------------------------------------------------------
+# X11 Related Stuff
+#------------------------------------------------------------------------------
 try:
-	if not display_width:
-		display_width = top.winfo_screenwidth()
-		ctrl_width = int(display_width/4)
-	if not display_height:
-		display_height = top.winfo_screenheight()
-		topbar_height = int(display_height/10)
-		ctrl_height = int((display_height-topbar_height)/2)
-except:
-	logging.warning("Can't get screen size. Using default 320x240!")
-	display_width = 320
-	display_height = 240
-	topbar_height = int(display_height/10)
-	ctrl_width = int(display_width/4)
-	ctrl_height = int((display_height-topbar_height)/2)
+	#------------------------------------------------------------------------------
+	# Create & Configure Top Level window 
+	#------------------------------------------------------------------------------
 
-# Adjust font size, if not defined
-if not font_size:
-	font_size = int(display_width/32)
+	top = tkinter.Tk()
 
-# Adjust Root Window Geometry
-top.geometry(str(display_width)+'x'+str(display_height))
-top.maxsize(display_width,display_height)
-top.minsize(display_width,display_height)
-
-# Disable cursor for real Zynthian Boxes
-if wiring_layout!="EMULATOR" and wiring_layout!="DUMMIES" and not force_enable_cursor:
-	top.config(cursor="none")
-else:
-	top.config(cursor="cross")
-
-#------------------------------------------------------------------------------
-# Global Variables
-#------------------------------------------------------------------------------
-
-# Fonts
-font_listbox=(font_family,int(1.0*font_size))
-font_topbar=(font_family,int(1.1*font_size))
-
-# Loading Logo Animation
-loading_imgs=[]
-pil_frame = Image.open("./img/zynthian_gui_loading.gif")
-fw, fh = pil_frame.size
-fw2=ctrl_width-8
-fh2=int(fh*fw2/fw)
-nframes = 0
-while pil_frame:
-	pil_frame2 = pil_frame.resize((fw2, fh2), Image.ANTIALIAS)
-	# convert PIL image object to Tkinter PhotoImage object
-	loading_imgs.append(ImageTk.PhotoImage(pil_frame2))
-	nframes += 1
+	# Try to autodetect screen size if not configured
 	try:
-		pil_frame.seek(nframes)
-	except EOFError:
-		break;
-#for i in range(13):
-#	loading_imgs.append(tkinter.PhotoImage(file="./img/zynthian_gui_loading.gif", format="gif -index "+str(i)))
+		if not display_width:
+			display_width = top.winfo_screenwidth()
+			ctrl_width = int(display_width/4)
+		if not display_height:
+			display_height = top.winfo_screenheight()
+			topbar_height = int(display_height/10)
+			ctrl_height = int((display_height-topbar_height)/2)
+	except:
+		logging.warning("Can't get screen size. Using default 320x240!")
+		display_width = 320
+		display_height = 240
+		topbar_height = int(display_height/10)
+		ctrl_width = int(display_width/4)
+		ctrl_height = int((display_height-topbar_height)/2)
+
+	# Adjust font size, if not defined
+	if not font_size:
+		font_size = int(display_width/32)
+
+	# Adjust Root Window Geometry
+	top.geometry(str(display_width)+'x'+str(display_height))
+	top.maxsize(display_width,display_height)
+	top.minsize(display_width,display_height)
+
+	# Disable cursor for real Zynthian Boxes
+	if wiring_layout!="EMULATOR" and wiring_layout!="DUMMIES" and not force_enable_cursor:
+		top.config(cursor="none")
+	else:
+		top.config(cursor="cross")
+
+	#------------------------------------------------------------------------------
+	# Global Variables
+	#------------------------------------------------------------------------------
+
+	# Fonts
+	font_listbox=(font_family,int(1.0*font_size))
+	font_topbar=(font_family,int(1.1*font_size))
+
+	# Loading Logo Animation
+	loading_imgs=[]
+	pil_frame = Image.open("./img/zynthian_gui_loading.gif")
+	fw, fh = pil_frame.size
+	fw2=ctrl_width-8
+	fh2=int(fh*fw2/fw)
+	nframes = 0
+	while pil_frame:
+		pil_frame2 = pil_frame.resize((fw2, fh2), Image.ANTIALIAS)
+		# convert PIL image object to Tkinter PhotoImage object
+		loading_imgs.append(ImageTk.PhotoImage(pil_frame2))
+		nframes += 1
+		try:
+			pil_frame.seek(nframes)
+		except EOFError:
+			break;
+	#for i in range(13):
+	#	loading_imgs.append(tkinter.PhotoImage(file="./img/zynthian_gui_loading.gif", format="gif -index "+str(i)))
+
+except:
+	logging.warning("No Display!")
 
 #------------------------------------------------------------------------------
 # Zynthian GUI variable
